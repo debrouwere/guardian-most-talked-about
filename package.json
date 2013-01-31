@@ -1,0 +1,20 @@
+{
+  "name": "guardian-most-talked-about",
+  "version": "0.1.0",
+  "description": "Figure out the top social content from the Guardian by number of shares across different social networks.",
+  "main": "top.coffee",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": "",
+  "author": "Stijn Debrouwere",
+  "license": "MIT", 
+  "dependencies": {
+    "underscore": "1.x", 
+    "async": "0.1.x", 
+    "request": "2.x", 
+    "commander": "1.x", 
+    "cli-table": "0.2.x", 
+    "moment": "1.x"
+  }
+}
