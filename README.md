@@ -45,7 +45,7 @@ the cache and try again.
 
 ## License
 
-Guardian Conversation Starters comes with an MIT license.
+Guardian Most Talked About comes with an MIT license.
 
 ## Thanks
 
