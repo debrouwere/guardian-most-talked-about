@@ -97,7 +97,10 @@ data =
                 else
                     data.getArticles date, (contentErrors, articles) ->
                         async.forEachSeries articles, data.getShareCount, (shareCountErrors) ->
+                            process.stdout.write '\n'
                             errors = (contentErrors or []).concat (shareCountErrors or [])
+                            unless errors.length then errors = null
+
                             cache.put file, articles, ->
                                 done errors, articles
 
