@@ -46,13 +46,14 @@ data =
                 else
                     process.stdout.write '.'
 
-            article.shareCount = (_.values shares).reduce (a, b) ->
-                if b instanceof Number
-                    a + b
-                else if b is null
-                    a
-                else
-                    a + (b?.total_count or 0)
+            article.shares = shares
+            article.shares.total = (_.values shares).reduce (a, b) ->
+                if typeof a isnt 'number'
+                    a = (a?.total_count or 0)
+                if typeof b isnt 'number'
+                    b = (b?.total_count or 0)
+
+                a + b
 
             callback null
 
