@@ -15,6 +15,7 @@
     "request": "2.x", 
     "commander": "1.x", 
     "cli-table": "0.2.x", 
-    "moment": "1.x"
+    "moment": "1.x",
+    "moment-range": "0.1.x"
   }
 }

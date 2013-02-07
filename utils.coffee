@@ -1,18 +1,35 @@
 fs = require 'fs'
 fs.path = require 'path'
-moment = require 'moment'
+
+DAY = 60 * 60 * 24 * 1000
 
 class exports.DateRange
     constructor: (n) ->
-        @from = moment().subtract('days', n).format('YYYY-MM-DD')
-        @to = moment().subtract('days', 1).format('YYYY-MM-DD')
-        @list = (moment().subtract('days', i).format('YYYY-MM-DD') for i in [1..n]).reverse()
+        if typeof n is 'string'
+            [from, to] = (n.split ' ')
+            @to = new Date to
+            @from = new Date from
+            n = (@to - @from) / DAY
+        else
+            n = n-1
+            @to = new Date(new Date() - DAY)
+            @from = new Date(@to - n*DAY)
+
+        @list = ((@human @to - DAY*i) for i in [0..n]).reverse()
+
+    human: (date) ->
+        if typeof date is 'number'
+            date = new Date date
+        else if typeof date is 'string'
+            date = @[date]
+
+        date.toISOString()[..9]
 
     toString: ->
         if @from is @to
-            @from
+            @human 'from'
         else
-            "#{@from}-to-#{@to}"
+            "#{@human('from')} to #{@human('to')}"
 
 # creating and cleaning the cache are synchronous because these are generally init steps
 class exports.FileCache

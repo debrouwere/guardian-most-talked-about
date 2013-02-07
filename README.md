@@ -23,17 +23,20 @@ by typing:
 Some example commands: 
 
     # Return a top 20 for the last seven days, with verbose (debugging) output
-    ./top.coffee --days 7 --number 20 --verbose
+    ./top.coffee --days 7 --number 20 --verbose --humanize
 
-    # Return a top 10 of last day's content
-    ./top-coffee
+    # Print out top shares to stdout, rather than writing them to a file
+    ./top.coffee --print
+
+    # Return a top 10 of last day's content as a CSV
+    ./top.coffee
+
+    # Return top social content for January 2013
+    ./top.coffee --range '2013-01-01 2013-01-31'
 
 Results will be in the `./results` directory.
 
 Because the application fetches the sharecounts for each individual article published in the daterange you specified, and because it fetches these sharecounts sequentially (so as not to hammer the APIs it uses) expect it to take at least a couple of minutes per day of content.
-
-It is currently not possible to specify an arbitrary date range: you can specify from when to
-start using `--days` but the end of the range will always be yesterday.
 
 ## Troubleshooting
 

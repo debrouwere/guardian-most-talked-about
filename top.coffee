@@ -23,6 +23,7 @@ data =
                 console.log errorMessage
             else
                 process.stdout.write '/'
+                article.shares = NaN
 
             return callback [new Error errorMessage], null
 
@@ -33,7 +34,9 @@ data =
                 url: article.webUrl
 
         request req, (error, response, shares) ->
-            if error
+            # if shares is a string rather than an object, then that's
+            # usually an error message
+            if error or (typeof shares is 'string')
                 if program.verbose
                     console.log "Error fetching share count for #{article.webUrl}"
                 else
@@ -110,17 +113,23 @@ data =
 
 
 slicePopular = (articles, n) ->
-    sortedArticles = _.sortBy articles, (article) -> article.shareCount
+    filteredArticles = articles.filter (article) ->
+        (article.shares isnt NaN) and (typeof article.shares isnt 'string')
+    sortedArticles = _.sortBy filteredArticles, (article) -> article.shares.total
     sortedArticles.slice(-n).reverse()
 
 program
     .version('0.0.1')
     .option('-d, --days <n>', 'How many days of content to analyze.', parseInt)
+    .option('-r, --range <r>', 'A range of dates to analyze. Don\'t forget to quote.')
     .option('-n, --number <n>', 'Show the top n articles.', parseInt)
     .option('-v, --verbose', 'Enable verbose output.')
+    .option('-h, --humanize', 'Present output as a table rather than raw CSV.')
+    .option('-p, --print', 'Print output to stdout rather than writing it to a results file.')
+    .option('-m, --more', 'Include more detail about share counts of individual services. (Only in CSV output.)')
     .parse(process.argv)
 
-selectedDateRange = new utils.DateRange program.days or 1
+selectedDateRange = new utils.DateRange program.days or program.range or 1
 mostPopularSlice = program.number or 10
 
 data.getArticlesWithShareCounts selectedDateRange, (errors, articles) ->
@@ -129,16 +138,41 @@ data.getArticlesWithShareCounts selectedDateRange, (errors, articles) ->
 
     mostPopular = slicePopular articles, mostPopularSlice
 
-    table = new Table()
-    mostPopular.forEach (article) ->
-        table.push [
-            article.shareCount
-            [article.webTitle, article.webUrl].join('\n')
-            ]
+    ###
+    # spot fetch errors 
 
-    dest = "./results/#{selectedDateRange}.txt"
+    a = articles.filter (article) -> typeof article.shares is 'string'
+    console.log a.map (article) -> article.webPublicationDate
+    ###
 
-    unless fs.existsSync './results'
-        fs.mkdirSync './results'
+    if program.humanize
+        table = new Table()
+        mostPopular.forEach (article) ->
+            table.push [
+                article.shares.total
+                [article.webTitle, article.webUrl].join('\n')
+                ]
 
-    fs.writeFileSync dest, table.toString(), 'utf8'
+        out = 'Most talked about content from '
+        out += selectedDateRange.toString()
+        out += '\n'
+        out += table.toString()
+        ext = 'txt'
+    else
+        out = ''
+        mostPopular.forEach (article) ->
+            out += [
+                article.shares.total
+                article.webUrl
+                ].join(',')
+            out += '\n'
+        ext = 'csv'
+
+    if program.print
+        console.log out
+    else
+        dest = "./results/#{selectedDateRange}.#{ext}".replace(/\s/g, '-')
+        unless fs.existsSync './results'
+            fs.mkdirSync './results'
+
+        fs.writeFileSync dest, out, 'utf8'
